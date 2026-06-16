@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Oficina · Uns Predinhos</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --papel: #F5F0E8;
+    --papel-escuro: #EDE7D9;
+    --tinta: #1C1C1A;
+    --ferrugem: #B85C2A;
+    --musgo: #3D5230;
+    --cinza: #6B6560;
+    --borda: #C8BFB0;
+  }
+
+  body {
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* CABEÇALHO */
+  header {
+    border-bottom: 2px solid var(--tinta);
+    padding: 2rem 2rem 1.2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .header-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ferrugem);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .header-titulo {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--tinta);
+  }
+
+  .header-subtitulo {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--cinza);
+    margin-left: auto;
+    align-self: flex-end;
+  }
+
+  /* LAYOUT PRINCIPAL */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (max-width: 680px) {
+    main { grid-template-columns: 1fr; gap: 2rem; padding: 1.5rem 1.2rem 3rem; }
+    header { padding: 1.2rem 1.2rem 1rem; }
+    .header-subtitulo { margin-left: 0; }
+  }
+
+  /* COLUNA DE CONFIGURAÇÃO */
+  .configurador h2 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cinza);
+    margin-bottom: 1.8rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .campo {
+    margin-bottom: 1.6rem;
+  }
+
+  .campo label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta);
+    margin-bottom: 0.6rem;
+  }
+
+  .opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .opcao {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    cursor: pointer;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--borda);
+    background: white;
+    transition: border-color 0.15s, background 0.15s;
+    border-radius: 2px;
+  }
+
+  .opcao:hover {
+    border-color: var(--ferrugem);
+    background: #FDF8F3;
+  }
+
+  .opcao input[type="radio"] {
+    accent-color: var(--ferrugem);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .opcao-label {
+    font-size: 0.9rem;
+    color: var(--tinta);
+    line-height: 1.3;
+  }
+
+  .opcao-detalhe {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--cinza);
+    margin-top: 0.15rem;
+  }
+
+  .opcao input:checked ~ .opcao-texto .opcao-label {
+    color: var(--ferrugem);
+    font-style: italic;
+  }
+
+  .opcao:has(input:checked) {
+    border-color: var(--ferrugem);
+    background: #FDF8F3;
+  }
+
+  .btn-gerar {
+    width: 100%;
+    margin-top: 2rem;
+    padding: 0.9rem 1.5rem;
+    background: var(--tinta);
+    color: var(--papel);
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: background 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-gerar:hover {
+    background: var(--ferrugem);
+  }
+
+  /* COLUNA DA EMENTA */
+  .resultado h2 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cinza);
+    margin-bottom: 1.8rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .ementa-vazia {
+    color: var(--cinza);
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding: 2rem 0;
+  }
+
+  /* DOCUMENTO DE EMENTA */
+  .ementa-doc {
+    display: none;
+    background: white;
+    border: 1px solid var(--borda);
+    box-shadow: 4px 4px 0px var(--borda);
+    padding: 1.8rem;
+    position: relative;
+  }
+
+  .ementa-doc.visivel {
+    display: block;
+    animation: surgir 0.3s ease;
+  }
+
+  @keyframes surgir {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ementa-timbre {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--tinta);
+  }
+
+  .ementa-timbre-nome {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ferrugem);
+  }
+
+  .ementa-timbre-data {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--cinza);
+  }
+
+  .ementa-titulo-doc {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+  }
+
+  .ementa-subtitulo-doc {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--cinza);
+    margin-bottom: 1.2rem;
+  }
+
+  .ementa-ficha {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 1rem;
+    background: var(--papel-escuro);
+    padding: 0.8rem;
+    margin-bottom: 1.4rem;
+    border-left: 3px solid var(--ferrugem);
+  }
+
+  .ficha-item {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .ficha-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cinza);
+    display: block;
+  }
+
+  .ementa-secao {
+    margin-bottom: 1.2rem;
+  }
+
+  .ementa-secao-titulo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--musgo);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .ementa-secao p {
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--tinta);
+  }
+
+  .blocos-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .bloco-item {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  .bloco-tempo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--ferrugem);
+    background: #FDF8F3;
+    border: 1px solid var(--ferrugem);
+    padding: 0.2rem 0.4rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .bloco-conteudo strong {
+    display: block;
+    font-size: 0.82rem;
+    font-family: Georgia, serif;
+    font-style: italic;
+    margin-bottom: 0.2rem;
+  }
+
+  .bloco-conteudo span {
+    font-size: 0.78rem;
+    color: var(--cinza);
+    line-height: 1.5;
+  }
+
+  .materiais-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+
+  .material-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--borda);
+    color: var(--tinta);
+    background: var(--papel-escuro);
+  }
+
+  .ementa-rodape {
+    margin-top: 1.4rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--borda);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cinza);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .btn-copiar {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--borda);
+    background: var(--papel);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cinza);
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn-copiar:hover {
+    border-color: var(--musgo);
+    color: var(--musgo);
+  }
+
+  /* NOTA DE RODAPÉ DA PÁGINA */
+  .pagina-rodape {
+    border-top: 1px solid var(--borda);
+    padding: 1.2rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cinza);
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 680px) {
+    .pagina-rodape { padding: 1rem 1.2rem; }
+    .ementa-ficha { grid-template-columns: 1fr; }
+    .ementa-timbre { flex-direction: column; gap: 0.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-logo">Uns Predinhos</span>
+  <h1 class="header-titulo">Gerador de Oficina</h1>
+  <span class="header-subtitulo">desenho · patrimônio · cidade</span>
+</header>
+
+<main>
+
+  <!-- COLUNA ESQUERDA: CONFIGURADOR -->
+  <section class="configurador">
+    <h2>Configure a oficina</h2>
+
+    <div class="campo">
+      <label>Tempo disponível</label>
+      <div class="opcoes">
+        <label class="opcao">
+          <input type="radio" name="tempo" value="1h">
+          <span class="opcao-texto">
+            <span class="opcao-label">1 hora</span>
+            <span class="opcao-detalhe">Uma atividade principal, conversa curta</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="tempo" value="2h">
+          <span class="opcao-texto">
+            <span class="opcao-label">2 horas</span>
+            <span class="opcao-detalhe">Dois blocos práticos com mediação</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="tempo" value="3h">
+          <span class="opcao-texto">
+            <span class="opcao-label">3 horas ou mais</span>
+            <span class="opcao-detalhe">Percurso completo, roda de encerramento</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Faixa etária</label>
+      <div class="opcoes">
+        <label class="opcao">
+          <input type="radio" name="idade" value="criancas">
+          <span class="opcao-texto">
+            <span class="opcao-label">Crianças</span>
+            <span class="opcao-detalhe">6 a 12 anos</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="idade" value="adolescentes">
+          <span class="opcao-texto">
+            <span class="opcao-label">Adolescentes</span>
+            <span class="opcao-detalhe">13 a 17 anos</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="idade" value="adultos">
+          <span class="opcao-texto">
+            <span class="opcao-label">Adultos</span>
+            <span class="opcao-detalhe">18 anos em diante</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="idade" value="misto">
+          <span class="opcao-texto">
+            <span class="opcao-label">Grupo misto</span>
+            <span class="opcao-detalhe">Idades variadas</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Materiais disponíveis</label>
+      <div class="opcoes">
+        <label class="opcao">
+          <input type="radio" name="materiais" value="completo">
+          <span class="opcao-texto">
+            <span class="opcao-label">Completo</span>
+            <span class="opcao-detalhe">Lápis, caneta e giz pastel oleoso</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="materiais" value="lapis-caneta">
+          <span class="opcao-texto">
+            <span class="opcao-label">Lápis e caneta</span>
+            <span class="opcao-detalhe">Sem cor, foco em linha e observação</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="materiais" value="so-lapis">
+          <span class="opcao-texto">
+            <span class="opcao-label">Só lápis grafite</span>
+            <span class="opcao-detalhe">Mínimo — qualquer ambiente</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Tamanho do grupo</label>
+      <div class="opcoes">
+        <label class="opcao">
+          <input type="radio" name="grupo" value="pequeno">
+          <span class="opcao-texto">
+            <span class="opcao-label">Pequeno</span>
+            <span class="opcao-detalhe">Até 10 participantes</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="grupo" value="medio">
+          <span class="opcao-texto">
+            <span class="opcao-label">Médio</span>
+            <span class="opcao-detalhe">10 a 25 participantes</span>
+          </span>
+        </label>
+        <label class="opcao">
+          <input type="radio" name="grupo" value="grande">
+          <span class="opcao-texto">
+            <span class="opcao-label">Grande</span>
+            <span class="opcao-detalhe">25 ou mais participantes</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn-gerar" onclick="gerarEmenta()">Gerar ementa →</button>
+  </section>
+
+  <!-- COLUNA DIREITA: RESULTADO -->
+  <section class="resultado">
+    <h2>Ementa gerada</h2>
+
+    <p class="ementa-vazia" id="ementa-vazia">
+      Escolha as opções ao lado e clique em "Gerar ementa" para montar o plano da oficina.
+    </p>
+
+    <div class="ementa-doc" id="ementa-doc">
+
+      <div class="ementa-timbre">
+        <span class="ementa-timbre-nome">Uns Predinhos · Oficina de Desenho e Patrimônio</span>
+        <span class="ementa-timbre-data" id="doc-data"></span>
+      </div>
+
+      <div class="ementa-titulo-doc" id="doc-titulo"></div>
+      <div class="ementa-subtitulo-doc" id="doc-subtitulo"></div>
+
+      <div class="ementa-ficha">
+        <div class="ficha-item"><span class="ficha-label">Duração</span><span id="ficha-duracao"></span></div>
+        <div class="ficha-item"><span class="ficha-label">Público</span><span id="ficha-publico"></span></div>
+        <div class="ficha-item"><span class="ficha-label">Participantes</span><span id="ficha-grupo"></span></div>
+        <div class="ficha-item"><span class="ficha-label">Materiais</span><span id="ficha-materiais"></span></div>
+      </div>
+
+      <div class="ementa-secao">
+        <div class="ementa-secao-titulo">Apresentação</div>
+        <p id="doc-apresentacao"></p>
+      </div>
+
+      <div class="ementa-secao">
+        <div class="ementa-secao-titulo">Estrutura da oficina</div>
+        <ul class="blocos-lista" id="doc-blocos"></ul>
+      </div>
+
+      <div class="ementa-secao">
+        <div class="ementa-secao-titulo">Lista de materiais</div>
+        <div class="materiais-lista" id="doc-materiais-lista"></div>
+      </div>
+
+      <div class="ementa-secao">
+        <div class="ementa-secao-titulo">Nota ao facilitador</div>
+        <p id="doc-nota"></p>
+      </div>
+
+      <div class="ementa-rodape">
+        <span>Bruno Lorenz · unspredinhos.com.br</span>
+        <span id="doc-codigo"></span>
+      </div>
+    </div>
+
+    <button class="btn-copiar" id="btn-copiar" style="display:none" onclick="copiarTexto()">
+      ↳ copiar texto da ementa
+    </button>
+  </section>
+
+</main>
+
+<footer class="pagina-rodape">
+  <span>Oficina · Desenho e Patrimônio Edificado</span>
+  <span>unspredinhos · Porto Alegre, RS</span>
+</footer>
+
+<script>
+// ─── BASE DE DADOS DOS MÓDULOS ───────────────────────────────────────────────
+
+const titulos = {
+  criancas:     "A Cidade que Eu Vejo",
+  adolescentes: "O Edifício que Nos Habita",
+  adultos:      "Patrimônio e Presença",
+  misto:        "Traços da Cidade Comum",
+};
+
+const subtitulos = {
+  criancas:     "desenho, observação e pertencimento urbano",
+  adolescentes: "desenho, memória e identidade no espaço edificado",
+  adultos:      "desenho observacional e patrimônio cultural",
+  misto:        "desenho e patrimônio para grupos intergeracionais",
+};
+
+const apresentacoes = {
+  criancas: "A oficina convida crianças a olhar para a cidade de um jeito diferente: com curiosidade, calma e lápis na mão. Por meio de exercícios de observação e desenho, os participantes descobrem que os prédios e ruas ao redor guardam histórias, identidades e memórias coletivas. O foco está no gesto, no olhar, na descoberta — não no resultado técnico.",
+  adolescentes: "A oficina articula percepção visual, memória coletiva e identidade cultural a partir do patrimônio edificado como tema e como lugar. Os participantes desenvolvem um olhar atento às formas arquitetônicas — fachadas, texturas, detalhes — e traduzem essa leitura em linguagem gráfica, combinando prática de desenho e reflexão sobre pertencimento urbano.",
+  adultos: "Partindo da premissa de que desenhar é uma forma de prestar atenção, a oficina propõe uma experiência de leitura do espaço urbano através do desenho observacional. Os participantes são convidados a explorar o patrimônio edificado como lugar de memória e identidade, desenvolvendo técnicas de registro gráfico a partir da observação direta.",
+  misto: "A oficina propõe um encontro entre gerações em torno do ato de desenhar a cidade. Exercícios adaptados permitem que crianças, jovens e adultos participem juntos, cada um com seu olhar e seu ritmo, produzindo um registro coletivo do espaço e das histórias que ele abriga.",
+};
+
+// BLOCOS DE ATIVIDADE por tempo
+const blocos = {
+
+  "1h": {
+    criancas: [
+      { tempo: "10 min", titulo: "Abertura: o que você vê?", desc: "Conversa rápida e lúdica sobre o espaço. Perguntas simples: o que chama atenção? O que parece mais velho? O que parece mais novo?" },
+      { tempo: "35 min", titulo: "Desenho de observação livre", desc: "Cada criança escolhe um elemento do espaço para desenhar: uma janela, uma porta, um detalhe de parede. Facilitador circula e nomeia o que cada um está vendo." },
+      { tempo: "15 min", titulo: "Roda de apresentação", desc: "Cada participante mostra seu desenho e diz uma palavra sobre o lugar. Os trabalhos são dispostos juntos para formar um painel coletivo." },
+    ],
+    adolescentes: [
+      { tempo: "10 min", titulo: "Conversa inicial", desc: "O que é patrimônio? O que faz um lugar ser 'nosso'? Conversa breve, sem resposta certa — o objetivo é abrir o olhar." },
+      { tempo: "35 min", titulo: "Desenho cego + observação", desc: "Primeiro exercício com lápis: desenho cego de contorno (sem olhar para o papel), depois um segundo desenho olhando livremente. Comparação entre os dois." },
+      { tempo: "15 min", titulo: "Encerramento", desc: "Apresentação dos trabalhos. Cada participante escolhe qual dos dois desenhos prefere e explica por quê." },
+    ],
+    adultos: [
+      { tempo: "10 min", titulo: "Contextualização", desc: "Breve fala sobre patrimônio edificado, identidade urbana e o desenho como ato de documentação e afeto." },
+      { tempo: "40 min", titulo: "Desenho de observação", desc: "Exercício de desenho livre do espaço ou de elementos arquitetônicos escolhidos pelo participante. Ênfase na observação antes do traço." },
+      { tempo: "10 min", titulo: "Compartilhamento", desc: "Roda rápida: cada pessoa apresenta seu registro e nomeia o que mais chamou atenção no processo de observar." },
+    ],
+    misto: [
+      { tempo: "10 min", titulo: "Apresentação coletiva", desc: "Dinâmica de apresentação que mistura as idades: cada pessoa diz seu nome e algo que gosta de ver na cidade." },
+      { tempo: "35 min", titulo: "Desenho em duplas intergeracionais", desc: "Duplas formadas entre idades diferentes desenham juntas o mesmo elemento. Uma começa, a outra continua." },
+      { tempo: "15 min", titulo: "Mural coletivo", desc: "Os desenhos são reunidos em um painel. Roda de encerramento com uma palavra de cada participante." },
+    ],
+  },
+
+  "2h": {
+    criancas: [
+      { tempo: "15 min", titulo: "Abertura e aquecimento", desc: "Conversa sobre o lugar: o que é velho, o que é novo, o que parece diferente. Exercício de observação oral antes de tocar no lápis." },
+      { tempo: "30 min", titulo: "Desenho cego de contorno", desc: "Primeiro exercício com lápis grafite — as crianças desenham sem olhar para o papel, explorando a forma de uma fachada ou elemento arquitetônico. O erro é parte do processo." },
+      { tempo: "40 min", titulo: "Desenho com cor", desc: "Usando caneta ou pastel (conforme disponibilidade), cada criança faz um segundo desenho do mesmo ou de outro elemento, desta vez olhando e usando cor para expressar o que sentiu." },
+      { tempo: "15 min", titulo: "Roda de encerramento", desc: "Os trabalhos são exibidos coletivamente. Facilitador conduz conversa sobre o que cada um descobriu ao desenhar." },
+    ],
+    adolescentes: [
+      { tempo: "15 min", titulo: "Conversa: memória e espaço", desc: "O que faz um edifício 'pertencer' a uma comunidade? Exemplos locais, discussão aberta. Objetivo: ampliar o olhar antes de desenhar." },
+      { tempo: "45 min", titulo: "Desenho de observação com caneta", desc: "Exercício com caneta, sem borracha — o erro permanece e faz parte do registro. Foco em detalhes: molduras, texturas, ornamentos. O traço imperfeito é valorizado." },
+      { tempo: "40 min", titulo: "Cor e interpretação", desc: "Sobre o desenho de caneta, os participantes aplicam pastel oleoso explorando atmosfera e luz. Não se trata de realismo, mas de interpretação afetiva do espaço." },
+      { tempo: "20 min", titulo: "Apresentação e encerramento", desc: "Roda de apresentação dos trabalhos. Cada participante escolhe uma palavra que descreve o que sentiu ao desenhar aquele lugar." },
+    ],
+    adultos: [
+      { tempo: "20 min", titulo: "Abertura e contextualização", desc: "Fala sobre patrimônio, identidade urbana e desenho como prática de atenção. Exercício de observação guiada do espaço antes de qualquer traço." },
+      { tempo: "45 min", titulo: "Primeiro bloco — linha e estrutura", desc: "Desenho de observação com lápis grafite, foco na estrutura do espaço. Depois, desenho com caneta valorizando o traço sem retorno." },
+      { tempo: "35 min", titulo: "Segundo bloco — cor e atmosfera", desc: "Trabalho com pastel oleoso sobre o desenho de caneta. Orientação sobre sobreposição de cores e esfumado com o dedo." },
+      { tempo: "20 min", titulo: "Roda de encerramento", desc: "Apresentação dos trabalhos. Conversa sobre o processo: o que mudou no olhar ao desenhar? O que o espaço revelou?" },
+    ],
+    misto: [
+      { tempo: "20 min", titulo: "Abertura intergeracional", desc: "Dinâmica de apresentação e conversa sobre o lugar. Cada pessoa — criança ou adulto — conta uma memória ligada a um edifício ou rua." },
+      { tempo: "40 min", titulo: "Desenho de observação individual", desc: "Cada participante desenha com lápis um elemento do espaço, no seu próprio ritmo. Facilitador adapta as instruções conforme a idade." },
+      { tempo: "40 min", titulo: "Composição coletiva", desc: "Os participantes escolhem elementos dos seus desenhos individuais para montar uma composição coletiva — recortando, sobrepondo ou redesenhando juntos." },
+      { tempo: "20 min", titulo: "Encerramento e mural", desc: "Apresentação da obra coletiva. Cada pessoa assina e diz uma palavra sobre o lugar." },
+    ],
+  },
+
+  "3h": {
+    criancas: [
+      { tempo: "15 min", titulo: "Chegada e abertura lúdica", desc: "Jogo de observação: facilitador faz perguntas sobre o espaço e as crianças respondem apontando. Quem encontra mais detalhes?" },
+      { tempo: "30 min", titulo: "Exercício cego — mão e olho", desc: "Desenho cego de contorno com lápis. As crianças percebem que o olho e a mão 'conversam' mesmo sem ver o papel." },
+      { tempo: "40 min", titulo: "Desenho de observação com caneta", desc: "Com caneta preta (sem borracha), as crianças fazem um desenho mais elaborado de um elemento do espaço. O traço é definitivo — o que sair, fica." },
+      { tempo: "40 min", titulo: "Cor com pastel", desc: "Sobre o desenho de caneta, as crianças exploram pastel oleoso com liberdade. Podem colorir dentro ou fora dos contornos — a expressão é o foco." },
+      { tempo: "20 min", titulo: "Mural e roda final", desc: "Os trabalhos são expostos coletivamente. Cada criança apresenta o seu e recebe um comentário positivo do facilitador e do grupo." },
+      { tempo: "15 min", titulo: "Encerramento", desc: "Breve conversa sobre o que o lugar significou para cada um. Entrega dos trabalhos." },
+    ],
+    adolescentes: [
+      { tempo: "20 min", titulo: "Conversa: patrimônio e pertencimento", desc: "O que é patrimônio? Qual a diferença entre um monumento e um lugar da memória? Discussão com exemplos locais." },
+      { tempo: "40 min", titulo: "Bloco 1 — Ver antes de desenhar", desc: "Exercício de desenho cego e de observação com lápis grafite. Dois desenhos do mesmo elemento: um sem olhar, um olhando. Comparação e reflexão." },
+      { tempo: "50 min", titulo: "Bloco 2 — O traço e a memória", desc: "Desenho com caneta, sem borracha, explorando detalhes arquitetônicos: texturas, molduras, ornamentos, imperfeições. O erro como parte do registro." },
+      { tempo: "40 min", titulo: "Bloco 3 — Cor e interpretação afetiva", desc: "Pastel oleoso sobre o desenho de caneta. Trabalho de atmosfera, luz e sombra. Cada participante escolhe uma paleta que representa o que sente pelo lugar." },
+      { tempo: "20 min", titulo: "Roda de encerramento", desc: "Apresentação dos trabalhos. Uma palavra de cada participante. Possibilidade de compor mural coletivo." },
+                  { tempo: "10 min", titulo: "Avaliação rápida", desc: "Feedback anônimo: o que funcionou, o que poderia ser diferente. Registro para próximas edições." },
+    ],
+    adultos: [
+      { tempo: "25 min", titulo: "Abertura e observação guiada", desc: "Fala de contextualização sobre patrimônio, identidade e o desenho como prática de presença. Exercício de observação oral do espaço — os participantes descrevem o que veem antes de qualquer traço." },
+      { tempo: "45 min", titulo: "Bloco 1 — Estrutura e contorno", desc: "Desenho cego de contorno com lápis (aquecimento perceptivo), seguido de desenho de observação estrutural. Foco na arquitetura como forma, não como símbolo." },
+      { tempo: "50 min", titulo: "Bloco 2 — Detalhe e textura", desc: "Desenho com caneta preta sem borracha. Exploração de detalhes arquitetônicos: fissuras, ornamentos, texturas, marcas do tempo. O traço define, o detalhe revela." },
+      { tempo: "40 min", titulo: "Bloco 3 — Atmosfera e cor", desc: "Pastel oleoso sobre o desenho de caneta. Trabalho de luz, sombra e atmosfera. Não se trata de reproduzir a cor real, mas de interpretar a afetividade do lugar." },
+      { tempo: "20 min", titulo: "Roda de encerramento", desc: "Apresentação dos trabalhos. Conversa sobre o que mudou no olhar ao longo da oficina." },
+      { tempo: "10 min", titulo: "Encerramento e avaliação", desc: "Palavra final do facilitador. Feedback dos participantes. Informações sobre próximas atividades." },
+    ],
+    misto: [
+      { tempo: "20 min", titulo: "Abertura intergeracional", desc: "Apresentações e conversa sobre o lugar. Cada participante conta algo que já viveu em um espaço que guarda memória." },
+      { tempo: "40 min", titulo: "Bloco 1 — Olhar coletivo", desc: "Exercício de observação guiada do espaço em grupos mistos (crianças com adultos). Cada grupo identifica três elementos para desenhar." },
+      { tempo: "50 min", titulo: "Bloco 2 — Desenho individual", desc: "Cada participante desenha com lápis e caneta, no seu próprio ritmo. Facilitador adapta as instruções por faixa etária sem separar os grupos." },
+      { tempo: "40 min", titulo: "Bloco 3 — Composição coletiva com cor", desc: "Os grupos reúnem seus desenhos e compõem um painel coletivo, acrescentando cor com pastel. O resultado é uma obra de múltiplos olhares sobre o mesmo lugar." },
+      { tempo: "20 min", titulo: "Apresentação do mural", desc: "Apresentação pública do painel coletivo. Cada grupo conta o processo." },
+      { tempo: "10 min", titulo: "Encerramento", desc: "Palavra de encerramento. Registro fotográfico. Entrega dos trabalhos individuais." },
+    ],
+  },
+};
+
+const materiaisPorOpcao = {
+  completo:      ["lápis grafite HB e 2B", "caneta preta (nanquim ou esferográfica)", "giz pastel oleoso", "papel sulfite A4 ou kraft A3", "superfície de apoio"],
+  "lapis-caneta": ["lápis grafite HB e 2B", "caneta preta (nanquim ou esferográfica)", "papel sulfite A4 ou kraft A3", "superfície de apoio", "borracha (opcional — valorizar o erro)"],
+  "so-lapis":    ["lápis grafite HB e 2B", "papel sulfite A4", "superfície de apoio", "borracha (opcional)"],
+};
+
+const notasFacilitador = {
+  criancas: "Com crianças, o resultado técnico é secundário. Priorize o processo de observação: fazer perguntas sobre o espaço antes de desenhar é mais importante do que a qualidade do traço. Mantenha um ritmo leve, com possibilidade de pausas. Evite corrigir o desenho — comentários como 'olha que interessante esse detalhe que você percebeu' funcionam melhor do que qualquer instrução técnica.",
+  adolescentes: "Adolescentes tendem a se travar por medo de errar. O exercício com caneta (sem borracha) é especialmente poderoso com esse público — quebra o bloqueio ao tornar o erro inevitável e parte do processo. Referências visuais de desenho urbano contemporâneo podem ajudar a legitimizar a proposta.",
+  adultos: "Com adultos, o tempo de conversa é tão importante quanto a prática. Reserve espaço para que os participantes tragam suas próprias referências e memórias ligadas ao lugar. O desenho de observação pode ser vivido como meditação ativa — enfatize a presença e a atenção, não a técnica.",
+  misto: "Em grupos mistos, o maior desafio é o ritmo: crianças e adultos têm velocidades e focos diferentes. Use isso a favor: proponha que adultos observem como as crianças desenham com espontaneidade, e que as crianças observem como os adultos se detêm nos detalhes. O contraste é pedagógico.",
+};
+
+const grupoTextos = {
+  pequeno: "até 10 participantes",
+  medio:   "10 a 25 participantes",
+  grande:  "25 ou mais participantes",
+};
+
+const tempoTextos = {
+  "1h": "1 hora",
+  "2h": "2 horas",
+  "3h": "3 horas ou mais",
+};
+
+const idadeTextos = {
+  criancas:     "Crianças (6–12 anos)",
+  adolescentes: "Adolescentes (13–17 anos)",
+  adultos:      "Adultos (18+)",
+  misto:        "Grupo misto (todas as idades)",
+};
+
+const materiaisTexto = {
+  completo:      "Lápis, caneta e pastel oleoso",
+  "lapis-caneta": "Lápis e caneta",
+  "so-lapis":    "Só lápis grafite",
+};
+
+// ─── GERAÇÃO DA EMENTA ───────────────────────────────────────────────────────
+
+function gerarEmenta() {
+  const tempo    = document.querySelector('input[name="tempo"]:checked')?.value;
+  const idade    = document.querySelector('input[name="idade"]:checked')?.value;
+  const mats     = document.querySelector('input[name="materiais"]:checked')?.value;
+  const grupo    = document.querySelector('input[name="grupo"]:checked')?.value;
+
+  if (!tempo || !idade || !mats || !grupo) {
+    alert("Preencha todas as opções antes de gerar a ementa.");
+    return;
+  }
+
+  // Data
+  const agora = new Date();
+  const dataStr = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  document.getElementById('doc-data').textContent = dataStr;
+
+  // Cabeçalho
+  document.getElementById('doc-titulo').textContent = titulos[idade];
+  document.getElementById('doc-subtitulo').textContent = subtitulos[idade];
+
+  // Ficha técnica
+  document.getElementById('ficha-duracao').textContent = tempoTextos[tempo];
+  document.getElementById('ficha-publico').textContent  = idadeTextos[idade];
+  document.getElementById('ficha-grupo').textContent    = grupoTextos[grupo];
+  document.getElementById('ficha-materiais').textContent = materiaisTexto[mats];
+
+  // Apresentação
+  document.getElementById('doc-apresentacao').textContent = apresentacoes[idade];
+
+  // Blocos
+  const listaBlocos = document.getElementById('doc-blocos');
+  listaBlocos.innerHTML = '';
+  const blocosAtivos = blocos[tempo][idade];
+  blocosAtivos.forEach(b => {
+    const li = document.createElement('li');
+    li.className = 'bloco-item';
+    li.innerHTML = `
+      <span class="bloco-tempo">${b.tempo}</span>
+      <div class="bloco-conteudo">
+        <strong>${b.titulo}</strong>
+        <span>${b.desc}</span>
+      </div>`;
+    listaBlocos.appendChild(li);
+  });
+
+  // Materiais
+  const listaMats = document.getElementById('doc-materiais-lista');
+  listaMats.innerHTML = '';
+  materiaisPorOpcao[mats].forEach(m => {
+    const tag = document.createElement('span');
+    tag.className = 'material-tag';
+    tag.textContent = m;
+    listaMats.appendChild(tag);
+  });
+
+  // Nota ao facilitador
+  document.getElementById('doc-nota').textContent = notasFacilitador[idade];
+
+  // Código de referência
+  document.getElementById('doc-codigo').textContent =
+    `ref: ${tempo}-${idade.slice(0,3)}-${grupo.slice(0,3)}-${mats.slice(0,3)}`;
+
+  // Mostrar
+  document.getElementById('ementa-vazia').style.display = 'none';
+  const doc = document.getElementById('ementa-doc');
+  doc.classList.add('visivel');
+  document.getElementById('btn-copiar').style.display = 'block';
+
+  // Scroll suave no mobile
+  if (window.innerWidth < 680) {
+    doc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function copiarTexto() {
+  const doc = document.getElementById('ementa-doc');
+  const linhas = [];
+
+  linhas.push("OFICINA · " + document.getElementById('doc-titulo').textContent.toUpperCase());
+  linhas.push(document.getElementById('doc-subtitulo').textContent);
+  linhas.push("");
+  linhas.push("Duração: "      + document.getElementById('ficha-duracao').textContent);
+  linhas.push("Público: "       + document.getElementById('ficha-publico').textContent);
+  linhas.push("Participantes: " + document.getElementById('ficha-grupo').textContent);
+  linhas.push("Materiais: "     + document.getElementById('ficha-materiais').textContent);
+  linhas.push("");
+  linhas.push("APRESENTAÇÃO");
+  linhas.push(document.getElementById('doc-apresentacao').textContent);
+  linhas.push("");
+  linhas.push("ESTRUTURA");
+
+  document.querySelectorAll('#doc-blocos .bloco-item').forEach(li => {
+    const tempo = li.querySelector('.bloco-tempo').textContent;
+    const titulo = li.querySelector('strong').textContent;
+    const desc = li.querySelector('span').textContent;
+    linhas.push(`[${tempo}] ${titulo}: ${desc}`);
+  });
+
+  linhas.push("");
+  linhas.push("MATERIAIS");
+  const tags = [...document.querySelectorAll('#doc-materiais-lista .material-tag')].map(t => t.textContent);
+  linhas.push(tags.join(", "));
+
+  linhas.push("");
+  linhas.push("NOTA AO FACILITADOR");
+  linhas.push(document.getElementById('doc-nota').textContent);
+
+  linhas.push("");
+  linhas.push("Bruno Lorenz · unspredinhos.com.br");
+
+  navigator.clipboard.writeText(linhas.join("\n")).then(() => {
+    const btn = document.getElementById('btn-copiar');
+    btn.textContent = "✓ copiado!";
+    setTimeout(() => { btn.textContent = "↳ copiar texto da ementa"; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
